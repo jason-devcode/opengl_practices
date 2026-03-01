@@ -41,11 +41,13 @@ int main() {
 
     while (not glfwWindowShouldClose(window))
     {
-        glfwPollEvents();
         processInput(window);
 
         glClear( GL_COLOR_BUFFER_BIT );
         glfwSwapBuffers(window);
+
+        
+        glfwPollEvents();
     }
 
     glfwDestroyWindow(window);
