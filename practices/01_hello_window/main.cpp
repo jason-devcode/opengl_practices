@@ -24,6 +24,7 @@ int main() {
 
   if( not gladLoadGLLoader((GLADloadproc) glfwGetProcAddress ) ) {
     std::cerr << "Failed to load GL loader\n";
+    glfwDestroyWindow(window);
     glfwTerminate();
     return -1;
   }
