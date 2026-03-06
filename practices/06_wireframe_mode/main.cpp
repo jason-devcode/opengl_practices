@@ -85,9 +85,17 @@ ShaderResult process_shaders() {
   };
 }
 
+typedef struct { 
+  union {
+        struct { float x, y, z; };
+        struct { float r, g, b; };
+        float a[3];
+  };
+} vec3;
+
 typedef struct {
-  struct { float x, y, z; } pos;
-  struct { float r, g, b; } color;
+  vec3 pos;
+  vec3 color;
 } Vertex;
 
 typedef struct {
@@ -101,10 +109,10 @@ GLuint build_vao() {
   const unsigned int color_attrib = 1;
 
   Vertex vertices[] = {
-    { .pos = { .x = -0.5f, .y =  0.5f, .z = 0.0f }, .color = { .r = 1.0f, .g = 0.0f, .b = 0.0f  } },
-    { .pos = { .x =  0.5f, .y =  0.5f, .z = 0.0f }, .color = { .r = 0.0f, .g = 1.0f, .b = 0.0f  } },
-    { .pos = { .x =  0.5f, .y = -0.5f, .z = 0.0f }, .color = { .r = 0.0f, .g = 0.0f, .b = 1.0f  } },
-    { .pos = { .x = -0.5f, .y = -0.5f, .z = 0.0f }, .color = { .r = 1.0f, .g = 1.0f, .b = 1.0f  } }
+      { .pos = { -0.5f,  0.5f, 0.0f }, .color = { 1.0f, 0.0f, 0.0f } },  
+      { .pos = {  0.5f,  0.5f, 0.0f }, .color = { 0.0f, 1.0f, 0.0f } },
+      { .pos = {  0.5f, -0.5f, 0.0f }, .color = { 0.0f, 0.0f, 1.0f } },
+      { .pos = { -0.5f, -0.5f, 0.0f }, .color = { 1.0f, 1.0f, 1.0f } }
   };
 
   Triangle indices[] = {
@@ -131,11 +139,11 @@ GLuint build_vao() {
 
   // Store attribute pointers
   // Vertex Position 
-  glVertexAttribPointer( pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex ), (void*)0 );
+  glVertexAttribPointer( pos_attrib, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex ), (void*) offsetof( Vertex, pos ) );
   glEnableVertexAttribArray( pos_attrib );
 
   // Vertex Color
-  glVertexAttribPointer( color_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*) (sizeof(float) * 3) );
+  glVertexAttribPointer( color_attrib, 3, GL_FLOAT, GL_FALSE, sizeof( Vertex ), (void*) offsetof( Vertex, color ) );
   glEnableVertexAttribArray( color_attrib );
 
   // Unbind VAO and buffers
