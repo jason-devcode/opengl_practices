@@ -1,6 +1,8 @@
 #ifndef SHADER_H
 #define SHADER_H
 
+#define LOG_USE_COLOR
+
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -8,10 +10,13 @@
 
 #include <glad/glad.h>
 
+#include "logger.h"
+
 class Shader
 {
 public:
     Shader(const char *vertexShaderPath, const char *fragmentShaderPath);
+    ~Shader();
 
     void use();
 
@@ -19,17 +24,18 @@ public:
 
     typedef struct
     {
-        GLint shader;
+        GLuint shader;
         GLint success;
     } CompileResult;
     
     typedef struct
     {
-        GLint program;
+        GLuint program;
         GLint success;
     } LinkResult;
 
-    GLint m_shader_program = -1;
+    GLboolean success = GL_FALSE;
+    GLuint m_shader_program = 0;
 private:
     std::string read_shader_file(const char *filepath);
     CompileResult compile_shader(const char *sourceCode, GLenum shader_type);
@@ -45,14 +51,18 @@ void Shader::use() {
         glUseProgram( m_shader_program );
 }
 
+Shader::~Shader() {
+    glDeleteProgram( m_shader_program );
+}
+
 Shader::Shader(const char *vertexShaderPath, const char *fragmentShaderPath)
 {
     // process vertex shader
     std::string vs_src = read_shader_file( vertexShaderPath );
     CompileResult vs_result = compile_shader( vs_src.c_str(), GL_VERTEX_SHADER );
 
-    if( not vs_result.success ) {
-        std::cerr << "Shader::Shader: Failed to process vertex shader\n";
+    if( !vs_result.success ) {
+        LOG_ERROR("Failed to process vertex shader");
         return;
     }
 
@@ -60,21 +70,22 @@ Shader::Shader(const char *vertexShaderPath, const char *fragmentShaderPath)
     std::string fs_src = read_shader_file( fragmentShaderPath );
     CompileResult fs_result = compile_shader( fs_src.c_str(), GL_FRAGMENT_SHADER );
 
-    if( not vs_result.success ) {
-        std::cerr << "Shader::Shader: Failed to process fragment shader\n";
+    if( !vs_result.success ) {
+        LOG_ERROR("Failed to process fragment shader");
         return;
     }
     
     // Link shader program
     LinkResult programResult = link_shaders( vs_result.shader, fs_result.shader );
 
-    if( not programResult.success ) {
-        std::cerr << "Shader::Shader: Failed to link shader program\n";
+    if( !programResult.success ) {
+        LOG_ERROR("Shader::Shader: Failed to link shader program");
         return;
     }
 
     // Set shader program member
     m_shader_program = programResult.program;
+    success = GL_TRUE;
 }
 
 std::string Shader::read_shader_file(const char *filepath)
@@ -82,7 +93,7 @@ std::string Shader::read_shader_file(const char *filepath)
     std::string shaderContent;
     std::ifstream shaderFile;
 
-    std::cout << "Shader::read_shader_file: Reading shader file " << filepath << "...\n";
+    LOG_INFO( "Reading shader file %s...", filepath );
 
     try
     {
@@ -95,7 +106,7 @@ std::string Shader::read_shader_file(const char *filepath)
     }
     catch (const std::exception &e)
     {
-        std::cerr << "Shader::read_shader_file: " << e.what() << '\n';
+        LOG_ERROR( "%s", e.what() );
     }
     return NULL;
 }
@@ -103,7 +114,7 @@ std::string Shader::read_shader_file(const char *filepath)
 Shader::CompileResult Shader::compile_shader(const char *sourceCode, GLenum shader_type)
 {
     const char* shaderLogType = (shader_type == GL_VERTEX_SHADER ? "vertex" : "fragment");
-    std::cout << "Shader::compile_shader: Compiling " << shaderLogType << " shader...\n";
+    LOG_INFO( "Compiling %s shader...", shaderLogType );
 
     GLuint shader = glCreateShader(shader_type);
     glShaderSource(shader, 1, &sourceCode, NULL);
@@ -113,23 +124,22 @@ Shader::CompileResult Shader::compile_shader(const char *sourceCode, GLenum shad
     GLint success = GL_FALSE;
     glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
 
-    if (not success)
+    if (!success)
     {
         char log_info[1024];
         glGetShaderInfoLog(shader, 1024, NULL, log_info);
+        LOG_ERROR( "Failed to compile %s shader: %s", shaderLogType, log_info );
 
-        std::cerr << "Shader::compile_shader: Failed to compile " << shaderLogType << " shader: \n";
-        std::cerr << log_info << "\n";
         glDeleteShader(shader);
-        return (Shader::CompileResult){-1, GL_FALSE};
+        return (Shader::CompileResult){ 0, GL_FALSE};
     }
-    std::cout << "Shader::compile_shader: " << shaderLogType << " shader compiled successfully\n";
+    LOG_SUCCESS( "%s shader compiled successfully!", shaderLogType );
 
     return (Shader::CompileResult){ shader, GL_TRUE};
 }
 
 Shader::LinkResult Shader::link_shaders( GLuint vertexShader, GLuint fragmentShader ) {
-    std::cout << "Shader::link_shaders: Linking shaders...";
+    LOG_INFO("Linking shaders...");
 
     GLuint program = glCreateProgram();
     glAttachShader( program, vertexShader );
@@ -140,13 +150,15 @@ Shader::LinkResult Shader::link_shaders( GLuint vertexShader, GLuint fragmentSha
     GLint success = GL_FALSE;
     glGetProgramiv( program, GL_LINK_STATUS, &success );
 
-    if( not success ) {
+    if( !success ) {
         char info_log[ 1024 ];
         glGetProgramInfoLog( program, 1024, NULL, info_log );
-        std::cerr << "Shader::link_shaders: Failed to link shader program:\n" << info_log << "\n";
-        return (Shader::LinkResult){ -1, GL_FALSE };
+
+        LOG_ERROR( "Failed to link shader program: %s", info_log );
+        
+        return (Shader::LinkResult){ 0, GL_FALSE };
     }
-    std::cout << "Shader::link_shaders: Shaders linked successfully\n";
+    LOG_SUCCESS( "Shaders linked successfully!" );
     return (Shader::LinkResult){ program, GL_TRUE };
 }
 

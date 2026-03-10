@@ -122,8 +122,10 @@ void render_loop(GLFWwindow *window)
 
   Shader *shader = new Shader("shaders/vs.glsl", "shaders/fs.glsl");
 
-  if (shader->m_shader_program == -1)
+  if (!shader->success){
+    delete shader;
     return;
+  }
 
   GLuint vao = build_vao();
 
@@ -165,7 +167,7 @@ void render_loop(GLFWwindow *window)
 
     brg += 0.01;
   }
-
+  delete shader;
   stbi_image_free( data );
   glDeleteTextures( 1, &texture );
 }
