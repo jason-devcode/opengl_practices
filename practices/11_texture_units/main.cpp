@@ -113,9 +113,11 @@ Texture load_texture( const char* filepath ) {
 
   int width, height, nrChannels;
 
-  uint8_t* data = stbi_load( filepath, &width, &height, &nrChannels, 0 );
+  uint8_t* data = stbi_load( filepath, &width, &height, &nrChannels, STBI_rgb);
 
-  
+  LOG_INFO("Texture: %s → width=%d height=%d channels=%d", 
+       filepath, width, height, nrChannels);
+
   if( !data ) {
     LOG_ERROR( "Failed to load %s texture!", filepath );
     return { 0, 0, 0, NULL, 0, GL_FALSE };
@@ -140,7 +142,7 @@ Texture load_texture( const char* filepath ) {
   // Generate mipmaps
   glGenerateMipmap( GL_TEXTURE_2D );
 
-  LOG_SUCCESS( "Texture %s loaded successfully!", filepath );
+  LOG_SUCCESS( "Texture %s loaded successfully!\n", filepath );
 
   return (Texture) {
     .width = width, .height = height, .nrChannels = nrChannels,
@@ -171,17 +173,25 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
 
   puts("======== TEXTURES ========");
   Texture tx0 = load_texture( "textures/paving_stones.jpg" );
+  Texture tx1 = load_texture( "textures/displacement.jpg" );
 
   GLuint uniform_tex0 = glGetUniformLocation( shader->m_shader_program, "tex0" );
+  GLuint uniform_tex1 = glGetUniformLocation( shader->m_shader_program, "tex1" );
 
   while ( !glfwWindowShouldClose( window ) )
   {
     process_inputs( window );
     glClear( GL_COLOR_BUFFER_BIT );
     shader->use();
+
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, tx0.obj );
-    glUniform1i( uniform_tex0, GL_TEXTURE0 );
+    glUniform1i( uniform_tex0, 0 );
+
+    glActiveTexture( GL_TEXTURE1 );
+    glBindTexture( GL_TEXTURE_2D, tx1.obj );
+    glUniform1i( uniform_tex1, 1 );
+    
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glfwSwapBuffers( window );
@@ -190,6 +200,7 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
 
   glDeleteVertexArrays( 1, &vao );
   free_texture( &tx0 );
+  free_texture( &tx1 );
   delete shader;
 }
 
