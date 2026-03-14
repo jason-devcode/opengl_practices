@@ -15,7 +15,7 @@
 
 #define WIDTH 512
 #define HEIGHT 512
-#define TITLE "11 - Texture Units"
+#define TITLE "13 - Transformations  with GLM"
 
 
 typedef struct
@@ -58,11 +58,13 @@ GLuint build_vao()
   const unsigned int color_attrib = 1;
   const unsigned int tx_attrib = 2;
 
+  float scale = 0.85f;
+
   Vertex vertices[] = {
-      {.pos = {-1.0f, 1.0f, 0.0f},  .color = {1.0f, 0.0f, 0.0f}, .tx = { 0.0, 0.0 } },
-      {.pos = {1.0f, 1.0f, 0.0f},   .color = {0.0f, 1.0f, 0.0f}, .tx = { 1.0, 0.0 } },
-      {.pos = {1.0f, -1.0f, 0.0f},  .color = {0.0f, 0.0f, 1.0f}, .tx = { 1.0, 1.0 } },
-      {.pos = {-1.0f, -1.0f, 0.0f}, .color = {1.0f, 1.0f, 1.0f}, .tx = { 0.0, 1.0 } }};
+      {.pos = { -1.0f * scale,  1.0f * scale, 0.0f}, .color = {1.0f, 0.0f, 0.0f}, .tx = { 0.0, 0.0 } },
+      {.pos = {  1.0f * scale,  1.0f * scale, 0.0f}, .color = {0.0f, 1.0f, 0.0f}, .tx = { 1.0, 0.0 } },
+      {.pos = {  1.0f * scale, -1.0f * scale, 0.0f}, .color = {0.0f, 0.0f, 1.0f}, .tx = { 1.0, 1.0 } },
+      {.pos = { -1.0f * scale, -1.0f * scale, 0.0f}, .color = {1.0f, 1.0f, 1.0f}, .tx = { 0.0, 1.0 } }};
 
   Triangle indices[] = {
       {.A = 0, .B = 1, .C = 3},
@@ -192,7 +194,11 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   GLuint uniform_tex0 = glGetUniformLocation( shader->m_shader_program, "tex0" );
   GLuint uniform_tex1 = glGetUniformLocation( shader->m_shader_program, "tex1" );
 
-  test_glm();
+//  test_glm();
+
+  GLuint uniform_transform = glGetUniformLocation( shader->m_shader_program, "transform" );
+
+  glm::mat4 m = glm::mat4(1.0f);
 
   while ( !glfwWindowShouldClose( window ) )
   {
@@ -207,6 +213,10 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
     glActiveTexture( GL_TEXTURE1 );
     glBindTexture( GL_TEXTURE_2D, tx1.obj );
     glUniform1i( uniform_tex1, 1 );
+
+    m = glm::rotate( m, glm::radians( 1.0f ), glm::vec3( 0.0f, 1.0f, 0.0f ) );
+    m = glm::rotate( m, glm::radians( 0.6f ), glm::vec3( 0.0f, 0.0f, 1.0f ) );
+    glUniformMatrix4fv( uniform_transform, 1, GL_FALSE, glm::value_ptr(m) );
     
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
