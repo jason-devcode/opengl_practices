@@ -5,6 +5,11 @@
 #include "libs/shader.h"
 #include "libs/stb_image.h"
 
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include <stdint.h>
 #include <string.h>
 
@@ -157,6 +162,15 @@ void free_texture( Texture *texture ) {
   memset( texture, 0, sizeof(Texture) );
 }
 
+void test_glm() {
+  glm::vec4 vec( 1.0f, 0.0f, 0.0f, 1.0f );
+  glm::mat4 trans = glm::mat4(1.0f);
+  trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+  vec = trans * vec;
+  std::cout << vec.x << ", " << vec.y << ", " << vec.z << "\n";
+}
+
+
 void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   glViewport( 0, 0, initial_width, initial_height );
   glClearColor( 0, 0, 0, 1 );
@@ -177,6 +191,8 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
 
   GLuint uniform_tex0 = glGetUniformLocation( shader->m_shader_program, "tex0" );
   GLuint uniform_tex1 = glGetUniformLocation( shader->m_shader_program, "tex1" );
+
+  test_glm();
 
   while ( !glfwWindowShouldClose( window ) )
   {

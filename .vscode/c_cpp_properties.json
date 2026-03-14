@@ -5,7 +5,8 @@
             "includePath": [
                 "${workspaceFolder}/**",
                 "~/.gldev/glad/include",
-                "~/.gldev/glfw/include"
+                "~/.gldev/glfw/include",
+                "~/.gldev/glm/include"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",
