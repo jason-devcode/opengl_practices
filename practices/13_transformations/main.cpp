@@ -58,13 +58,11 @@ GLuint build_vao()
   const unsigned int color_attrib = 1;
   const unsigned int tx_attrib = 2;
 
-  float scale = 0.85f;
-
   Vertex vertices[] = {
-      {.pos = { -1.0f * scale,  1.0f * scale, 0.0f}, .color = {1.0f, 0.0f, 0.0f}, .tx = { 0.0, 0.0 } },
-      {.pos = {  1.0f * scale,  1.0f * scale, 0.0f}, .color = {0.0f, 1.0f, 0.0f}, .tx = { 1.0, 0.0 } },
-      {.pos = {  1.0f * scale, -1.0f * scale, 0.0f}, .color = {0.0f, 0.0f, 1.0f}, .tx = { 1.0, 1.0 } },
-      {.pos = { -1.0f * scale, -1.0f * scale, 0.0f}, .color = {1.0f, 1.0f, 1.0f}, .tx = { 0.0, 1.0 } }};
+      {.pos = { -1.0f,  1.0f, 0.0f}, .color = {1.0f, 0.0f, 0.0f}, .tx = { 0.0, 0.0 } },
+      {.pos = {  1.0f,  1.0f, 0.0f}, .color = {0.0f, 1.0f, 0.0f}, .tx = { 1.0, 0.0 } },
+      {.pos = {  1.0f, -1.0f, 0.0f}, .color = {0.0f, 0.0f, 1.0f}, .tx = { 1.0, 1.0 } },
+      {.pos = { -1.0f, -1.0f, 0.0f}, .color = {1.0f, 1.0f, 1.0f}, .tx = { 0.0, 1.0 } }};
 
   Triangle indices[] = {
       {.A = 0, .B = 1, .C = 3},
@@ -164,15 +162,6 @@ void free_texture( Texture *texture ) {
   memset( texture, 0, sizeof(Texture) );
 }
 
-void test_glm() {
-  glm::vec4 vec( 1.0f, 0.0f, 0.0f, 1.0f );
-  glm::mat4 trans = glm::mat4(1.0f);
-  trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
-  vec = trans * vec;
-  std::cout << vec.x << ", " << vec.y << ", " << vec.z << "\n";
-}
-
-
 void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   glViewport( 0, 0, initial_width, initial_height );
   glClearColor( 0, 0, 0, 1 );
@@ -194,11 +183,12 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   GLuint uniform_tex0 = glGetUniformLocation( shader->m_shader_program, "tex0" );
   GLuint uniform_tex1 = glGetUniformLocation( shader->m_shader_program, "tex1" );
 
-//  test_glm();
-
   GLuint uniform_transform = glGetUniformLocation( shader->m_shader_program, "transform" );
 
   glm::mat4 m = glm::mat4(1.0f);
+
+  float scale = 0.5f;
+  m = glm::scale( m, glm::vec3( scale * 2, scale, scale ) );
 
   while ( !glfwWindowShouldClose( window ) )
   {
