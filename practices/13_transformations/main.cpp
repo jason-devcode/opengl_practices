@@ -15,28 +15,10 @@
 
 #define WIDTH 512
 #define HEIGHT 512
-#define TITLE "13 - Transformations  with GLM"
+#define TITLE "13 - Transformations with GLM"
 
-
-typedef struct
-{
-  union
-  {
-    struct { float x, y, z; };
-    struct { float r, g, b; };
-    float a[3];
-  };
-} vec3;
-
-typedef struct
-{
-  union
-  {
-    struct { float u, v; };
-    struct { float s, t; };
-    float a[2];
-  };
-} vec2;
+using vec3 = glm::vec3;
+using vec2 = glm::vec2;
 
 typedef struct
 {
@@ -59,10 +41,10 @@ GLuint build_vao()
   const unsigned int tx_attrib = 2;
 
   Vertex vertices[] = {
-      {.pos = { -1.0f,  1.0f, 0.0f}, .color = {1.0f, 0.0f, 0.0f}, .tx = { 0.0, 0.0 } },
-      {.pos = {  1.0f,  1.0f, 0.0f}, .color = {0.0f, 1.0f, 0.0f}, .tx = { 1.0, 0.0 } },
-      {.pos = {  1.0f, -1.0f, 0.0f}, .color = {0.0f, 0.0f, 1.0f}, .tx = { 1.0, 1.0 } },
-      {.pos = { -1.0f, -1.0f, 0.0f}, .color = {1.0f, 1.0f, 1.0f}, .tx = { 0.0, 1.0 } }};
+      {.pos = vec3(-1.0f,  1.0f, 0.0f ), .color = vec3( 1.0f, 0.0f, 0.0f ), .tx = vec2( 0.0, 0.0 ) },
+      {.pos = vec3( 1.0f,  1.0f, 0.0f ), .color = vec3( 0.0f, 1.0f, 0.0f ), .tx = vec2( 1.0, 0.0 ) },
+      {.pos = vec3( 1.0f, -1.0f, 0.0f ), .color = vec3( 0.0f, 0.0f, 1.0f ), .tx = vec2( 1.0, 1.0 ) },
+      {.pos = vec3(-1.0f, -1.0f, 0.0f ), .color = vec3( 1.0f, 1.0f, 1.0f ), .tx = vec2( 0.0, 1.0 ) }};
 
   Triangle indices[] = {
       {.A = 0, .B = 1, .C = 3},
