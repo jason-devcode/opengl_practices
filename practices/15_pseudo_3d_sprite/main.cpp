@@ -13,7 +13,7 @@
 
 #define WIDTH 900
 #define HEIGHT 900
-#define TITLE "14 - Pseudo 3D Effect With OpenGL"
+#define TITLE "15 - Pseudo 3D Effect + Sprite Rendering"
 
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;
