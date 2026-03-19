@@ -13,7 +13,7 @@
 
 #define WIDTH 512 * 2
 #define HEIGHT 512 * 2
-#define TITLE "16 - 3D Projection"
+#define TITLE "17 - Depth Testing"
 
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;
