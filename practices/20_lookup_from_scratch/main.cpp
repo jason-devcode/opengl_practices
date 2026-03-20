@@ -239,7 +239,7 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   vec3 cameraFront = vec3( 0.0f, 0.0f, -1.0f );
 
   float cameraSpeed = 0.5;
-  float cameraAngle = glm::pi<float>();
+  float cameraAngle = 0.0;
 
   while ( !glfwWindowShouldClose( window ) )
   {
@@ -251,26 +251,26 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
     glBindTexture( GL_TEXTURE_2D, tx0.obj );
     glUniform1i( uniform_tex0, 0 );
 
-    if( glfwGetKey( window, GLFW_KEY_W ) ) cameraPos -= cameraSpeed * cameraFront;
-    if( glfwGetKey( window, GLFW_KEY_S ) ) cameraPos += cameraSpeed * cameraFront;
+    if( glfwGetKey( window, GLFW_KEY_W ) ) cameraPos += cameraSpeed * cameraFront;
+    if( glfwGetKey( window, GLFW_KEY_S ) ) cameraPos -= cameraSpeed * cameraFront;
 
-    if( glfwGetKey( window, GLFW_KEY_A ) ){ 
+    if( glfwGetKey( window, GLFW_KEY_D ) ){ 
       cameraAngle -= 0.01;
       cameraFront.x = sin( cameraAngle );
-      cameraFront.z = cos( cameraAngle );
+      cameraFront.z = -cos( cameraAngle );
     }
-    if( glfwGetKey( window, GLFW_KEY_D ) ){ 
+    if( glfwGetKey( window, GLFW_KEY_A ) ){ 
       cameraAngle += 0.01;
       cameraFront.x = sin( cameraAngle );
-      cameraFront.z = cos( cameraAngle );
+      cameraFront.z = -cos( cameraAngle );
     }
 
-    vec3 cameraRight = glm::cross( cameraFront, vec3( 0.0, 1.0, 0.0 ));
+    vec3 cameraRight = glm::normalize(glm::cross( vec3( 0.0f, 1.0f, 0.0f ), -cameraFront));
 
     // Calc correct camera up
-    vec3 cameraUp = glm::cross( cameraRight, cameraFront );
+    vec3 cameraUp = glm::cross( -cameraFront, cameraRight );
 
-    std::cout << "camera up: " << cameraUp.x << ", " << cameraUp.y << ", " << cameraUp.z << "\n";
+    // std::cout << "camera up: " << cameraUp.x << ", " << cameraUp.y << ", " << cameraUp.z << "\n";
 
     view = glm::mat4( 
       glm::vec4(cameraRight, 0.0f), 
@@ -278,7 +278,7 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
       glm::vec4(cameraFront, 0.0f), 
       glm::vec4( 0.0f ,0.0f ,0.0f, 1.0f ) 
     );
-    view = glm::translate( view, -cameraPos );
+    view = glm::translate( view, cameraPos );
     
     for( int i = 0; i < max_cubes; i++ ) {
       glm::mat4 model = glm::translate(glm::mat4(1.0f), cubes[i]);
