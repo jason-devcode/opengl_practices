@@ -22,6 +22,14 @@ class Camera {
             position += direction * sign;
         }
 
+        void move_horizontally( float sign ) {
+            position += right * sign;
+        }
+        
+        void move_vertically( float sign ) {
+            position += up * sign;
+        }
+
         void rotate( vec3 delta_rotation ) {
             rotation += delta_rotation;
         }

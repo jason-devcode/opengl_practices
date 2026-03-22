@@ -20,6 +20,8 @@
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;
 
+void process_camera_inputs( GLFWwindow* window, Camera& cam, float delta_time );
+
 
 void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   glViewport( 0, 0, initial_width, initial_height );
@@ -74,9 +76,6 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   GLuint u_mat_view       = glGetUniformLocation( shader->m_shader_program, "view"       );
   GLuint u_mat_projection = glGetUniformLocation( shader->m_shader_program, "projection" );
 
-  float cameraSpeed = 100.0f;
-  float cameraAngularSpeed = 2.0f;
-
   Camera cam;
   glm::mat4 view;      
   glm::mat4 projection;
@@ -91,6 +90,7 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
     delta_time = glfwGetTime() - last_time;
     last_time = glfwGetTime();
     process_inputs( window );
+    process_camera_inputs( window, cam, delta_time );
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     shader->use();
@@ -98,30 +98,6 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
     glActiveTexture( GL_TEXTURE0 );
     glBindTexture( GL_TEXTURE_2D, tx0.obj );
     glUniform1i( uniform_tex0, 0 );
-
-    if( glfwGetKey( window, GLFW_KEY_W ) )
-      cam.move_forward( delta_time * cameraSpeed );
-
-    if( glfwGetKey( window, GLFW_KEY_S ) )
-      cam.move_forward( -delta_time * cameraSpeed );
-
-    if( glfwGetKey( window, GLFW_KEY_D ) )
-      cam.rotate( vec3( 0.0f, 1.0f, 0.0f ) * -delta_time * cameraAngularSpeed);
-    
-    if( glfwGetKey( window, GLFW_KEY_A ) ) 
-      cam.rotate( vec3( 0.0f, 1.0f, 0.0f ) * delta_time * cameraAngularSpeed);
-
-    if( glfwGetKey( window, GLFW_KEY_R ) ) 
-      cam.rotate( vec3( 1.0f, 0.0f, 0.0f ) * delta_time * cameraAngularSpeed);
-    
-    if( glfwGetKey( window, GLFW_KEY_F ) ) 
-      cam.rotate( vec3( 1.0f, 0.0f, 0.0f ) * -delta_time * cameraAngularSpeed);
-
-    if( glfwGetKey( window, GLFW_KEY_Q ) ) 
-      cam.rotate( vec3( 0.0f, 0.0f, 1.0f ) * delta_time * cameraAngularSpeed);
-    
-    if( glfwGetKey( window, GLFW_KEY_E ) ) 
-      cam.rotate( vec3( 0.0f, 0.0f, 1.0f ) * -delta_time * cameraAngularSpeed);
 
     cam.update();
     cam.print_info();
@@ -154,4 +130,34 @@ int main() {
   render_loop( window, WIDTH, HEIGHT );
   close_engine( window );
   return 0;
+}
+
+
+void process_camera_inputs( GLFWwindow* window, Camera& cam, float delta_time ) {
+  float cameraSpeed = 100.0f;
+  float cameraAngularSpeed = 2.0f;
+
+  if( glfwGetKey( window, GLFW_KEY_W ) )
+    cam.move_forward( delta_time * cameraSpeed );
+
+  if( glfwGetKey( window, GLFW_KEY_S ) )
+    cam.move_forward( -delta_time * cameraSpeed );
+
+  if( glfwGetKey( window, GLFW_KEY_D ) )
+    cam.rotate( vec3( 0.0f, 1.0f, 0.0f ) * -delta_time * cameraAngularSpeed);
+  
+  if( glfwGetKey( window, GLFW_KEY_A ) ) 
+    cam.rotate( vec3( 0.0f, 1.0f, 0.0f ) * delta_time * cameraAngularSpeed);
+
+  if( glfwGetKey( window, GLFW_KEY_R ) ) 
+    cam.rotate( vec3( 1.0f, 0.0f, 0.0f ) * delta_time * cameraAngularSpeed);
+  
+  if( glfwGetKey( window, GLFW_KEY_F ) ) 
+    cam.rotate( vec3( 1.0f, 0.0f, 0.0f ) * -delta_time * cameraAngularSpeed);
+
+  if( glfwGetKey( window, GLFW_KEY_Q ) ) 
+    cam.rotate( vec3( 0.0f, 0.0f, 1.0f ) * delta_time * cameraAngularSpeed);
+  
+  if( glfwGetKey( window, GLFW_KEY_E ) ) 
+    cam.rotate( vec3( 0.0f, 0.0f, 1.0f ) * -delta_time * cameraAngularSpeed);
 }
