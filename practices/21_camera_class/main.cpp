@@ -15,7 +15,7 @@
 
 #define WIDTH 512 * 2
 #define HEIGHT 512 * 2
-#define TITLE "20 - camera lookup from scratch"
+#define TITLE "21 - camera class"
 
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;
