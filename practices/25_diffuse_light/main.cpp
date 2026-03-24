@@ -16,7 +16,7 @@
 
 #define WIDTH 512 * 2
 #define HEIGHT 512 * 2
-#define TITLE "24 - linear light"
+#define TITLE "25 - diffuse light"
 
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;
@@ -28,7 +28,6 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   glViewport( 0, 0, initial_width, initial_height );
   glClearColor( 0, 0, 0, 1 );
   glEnable( GL_DEPTH_TEST );
-  // glEnable( GL_CULL_FACE );
 
   puts("======== SHADERS ========");
   Shader* common_shader = new Shader( "shaders/vs.glsl", "shaders/fs.glsl");
@@ -65,7 +64,6 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
 
     process_inputs( window );
     process_camera_inputs( window, delta_time );
-
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
