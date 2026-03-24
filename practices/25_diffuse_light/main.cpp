@@ -37,17 +37,11 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   Shader* light_source_shader = new Shader( "shaders/light_source/vs.glsl", "shaders/light_source/fs.glsl");
   if( !light_source_shader->success ) { delete light_source_shader; return; }
   
-  // Mesh cubeMesh = build_cube_mesh();
-  Mesh sphereMesh = build_sphere_mesh(
-    16, 16, 3.0f, 
-    vec3( 1.0f, 1.0f, 1.0f ), 
-    vec3( 1.0f, 1.0f, 1.0f ), 
-    vec3( 1.0f, 1.0f, 1.0f )
-  );
+  Mesh planeMesh = build_plane_mesh( 10, 10, 60, 60, vec3( 0.0f, -3.0f, 0.0f ), vec3( 1.0f, 0.0f, 0.0f ), vec3( 0.0f, 0.0f, 1.0f ) );
+  Mesh sphereMesh = build_sphere_mesh( 16, 16, 3.0f, vec3( 1.0f, 1.0f, 1.0f ), vec3( 1.0f, 1.0f, 1.0f ), vec3( 1.0f, 1.0f, 1.0f ) );
 
   puts("======== TEXTURES ========");
   Texture tx0 = load_texture( "textures/uv_checker.png" );
-
 
   glm::mat4 projection = glm::perspective( glm::radians(45.0f), static_cast<float>(1.0f), 0.1f, 2000.0f );
 
@@ -58,24 +52,22 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   vec3 ambient_light = vec3( 0.1f, 0.1f, 0.1f  );
 
   glm::mat4 light_model;
-  light_model = glm::translate( mat4(1.0f), vec3( 5.0f, 0.0f, 0.0f ) );
-  light_model = glm::scale( light_model, vec3( 0.08f ));
+  light_model = glm::translate( mat4(1.0f), vec3( 15.0f, 0.0f, 0.0f ) );
+  light_model = glm::scale( light_model, vec3( 0.05f ));
 
-  cam.set_position( vec3( 0.0f, 0.0f, 12.0f ) );
+  cam.set_position( vec3( 0.0f, 0.0f, 20.0f ) );
+  cam.update();
 
   while ( !glfwWindowShouldClose( window ) )
   {
     delta_time = glfwGetTime() - last_time;
     last_time = glfwGetTime();
+
     process_inputs( window );
     process_camera_inputs( window, delta_time );
-    cam.update();
+
 
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-
-    glBindVertexArray( sphereMesh.vao );
-    glActiveTexture( GL_TEXTURE0 );
-    glBindTexture( GL_TEXTURE_2D, tx0.obj );
 
     glm::mat4 view = cam.get_lookup_view();
     glm::mat4 model = glm::translate(glm::mat4(1.0f), vec3(0.0f));
@@ -95,7 +87,14 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
 
     common_shader->setTexUnit( "tex0", 0 );
 
+    glActiveTexture( GL_TEXTURE0 );
+    glBindTexture( GL_TEXTURE_2D, tx0.obj );
+
+    glBindVertexArray( sphereMesh.vao );
     glDrawElements(GL_TRIANGLES, sphereMesh.numT * INDEX_PER_TRIANGLE, GL_UNSIGNED_INT, 0);
+
+    glBindVertexArray( planeMesh.vao );
+    glDrawElements(GL_TRIANGLES, planeMesh.numT * INDEX_PER_TRIANGLE, GL_UNSIGNED_INT, 0);
 
     light_source_shader->use();
     light_source_shader->setMat4( "model"     , light_model );
@@ -103,12 +102,14 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
     light_source_shader->setMat4( "projection", projection  );
     light_source_shader->setVec3( "lightColor", light_color );
 
+    glBindVertexArray( sphereMesh.vao );
     glDrawElements(GL_TRIANGLES, sphereMesh.numT * INDEX_PER_TRIANGLE, GL_UNSIGNED_INT, 0);
 
     glfwSwapBuffers( window );
     glfwPollEvents();
   }
 
+  free_mesh( &planeMesh );
   free_mesh( &sphereMesh );
   free_texture( &tx0 );
 

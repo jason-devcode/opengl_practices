@@ -300,4 +300,123 @@ Mesh build_sphere_mesh(
     return out;
 }
 
+Mesh build_plane_mesh(
+    int subdivisions_x,       // subdivisiones en X (≥ 1, ej: 10)
+    int subdivisions_z,       // subdivisiones en Z (≥ 1, ej: 10)
+    float width,              // ancho total en X
+    float depth,              // profundidad total en Z
+    glm::vec3 offset,         // offset de posicion
+    glm::vec3 color_a,        // color esquina (−X, −Z)
+    glm::vec3 color_b         // color esquina (+X, +Z)
+)
+{
+    const unsigned int pos_attrib    = 0;
+    const unsigned int color_attrib  = 1;
+    const unsigned int tx_attrib     = 2;
+    const unsigned int normal_attrib = 3;
+
+    // ── Generar vértices ──────────────────────────────────────────────────────
+    // (subdivisions_x+1) columnas × (subdivisions_z+1) filas
+    int cols = subdivisions_x + 1;
+    int rows = subdivisions_z + 1;
+    int numVertices = cols * rows;
+    Vertex* vertices = new Vertex[numVertices];
+
+    int vi = 0;
+    for (int iz = 0; iz < rows; ++iz)
+    {
+        float t  = (float)iz / (float)subdivisions_z;   // 0 → 1 en Z
+        float v  = t;                                    // UV.y
+
+        for (int ix = 0; ix < cols; ++ix)
+        {
+            float s  = (float)ix / (float)subdivisions_x;  // 0 → 1 en X
+            float u  = s;                                   // UV.x
+
+            float x  = (s - 0.5f) * width;   // centrado en origen
+            float y  = 0.0f;                  // plano plano en Y=0
+            float z  = (t - 0.5f) * depth;
+
+            // Interpolar color bilineal entre las dos esquinas
+            glm::vec3 color = glm::mix(color_a, color_b, (s + t) * 0.5f);
+
+            vertices[vi++] = {
+                vec3(x, y, z) + offset,
+                { color.r, color.g, color.b },
+                { u, v },
+                { 0.0f, 1.0f, 0.0f }   // normal apuntando a Y+
+            };
+        }
+    }
+
+    // ── Generar triángulos ────────────────────────────────────────────────────
+    // Cada quad (ix, iz) → 2 triángulos. Total: subdivisions_x × subdivisions_z × 2
+    int numTriangles = subdivisions_x * subdivisions_z * 2;
+    Triangle* triangles = new Triangle[numTriangles];
+
+    int ti = 0;
+    for (int iz = 0; iz < subdivisions_z; ++iz)
+    {
+        for (int ix = 0; ix < subdivisions_x; ++ix)
+        {
+            unsigned int top_left     =  iz      * cols + ix;
+            unsigned int top_right    =  iz      * cols + ix + 1;
+            unsigned int bottom_left  = (iz + 1) * cols + ix;
+            unsigned int bottom_right = (iz + 1) * cols + ix + 1;
+
+            // Winding CCW visto desde Y+ (norma OpenGL para caras frontales)
+            triangles[ti++] = { top_left,  bottom_left,  top_right    };
+            triangles[ti++] = { top_right, bottom_left,  bottom_right };
+        }
+    }
+
+    // ── Construir el Mesh ─────────────────────────────────────────────────────
+    Mesh out;
+    out.numV = numVertices;
+    out.numT = numTriangles;
+
+    out.vertices  = new Vertex[numVertices];
+    std::memcpy(out.vertices, vertices, numVertices * sizeof(Vertex));
+
+    out.triangles = new Triangle[numTriangles];
+    std::memcpy(out.triangles, triangles, numTriangles * sizeof(Triangle));
+
+    delete[] vertices;
+    delete[] triangles;
+
+    // ── Upload a GPU ──────────────────────────────────────────────────────────
+    GLuint VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, numVertices * sizeof(Vertex), out.vertices, GL_STATIC_DRAW);
+
+    GLuint VAO;
+    glGenVertexArrays(1, &VAO);
+    glBindVertexArray(VAO);
+
+    GLuint EBO;
+    glGenBuffers(1, &EBO);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, numTriangles * sizeof(Triangle), out.triangles, GL_STATIC_DRAW);
+
+    glVertexAttribPointer(pos_attrib,    3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, pos));
+    glEnableVertexAttribArray(pos_attrib);
+
+    glVertexAttribPointer(color_attrib,  3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, color));
+    glEnableVertexAttribArray(color_attrib);
+
+    glVertexAttribPointer(tx_attrib,     2, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, tx));
+    glEnableVertexAttribArray(tx_attrib);
+
+    glVertexAttribPointer(normal_attrib, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
+    glEnableVertexAttribArray(normal_attrib);
+
+    glBindVertexArray(0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    out.vao = VAO;
+    return out;
+}
+
 #endif
