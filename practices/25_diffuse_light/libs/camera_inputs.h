@@ -13,18 +13,25 @@ void process_camera_inputs( GLFWwindow* window, float delta_time ) {
   float cameraSpeed = 30.0f;
   float cameraAngularSpeed = 2.0f;
 
-  if( glfwGetKey( window, GLFW_KEY_W ) )
+  if( glfwGetKey( window, GLFW_KEY_W ) ) {
     cam.move_forward( delta_time * cameraSpeed );
+    cam.update();
+  }
 
-  if( glfwGetKey( window, GLFW_KEY_S ) )
+  if( glfwGetKey( window, GLFW_KEY_S ) ) {
     cam.move_forward( -delta_time * cameraSpeed );
+    cam.update();
+  }
 
-
-  if( glfwGetKey( window, GLFW_KEY_A ) )
+  if( glfwGetKey( window, GLFW_KEY_A ) ) {
     cam.move_horizontally( -delta_time * cameraSpeed );
+    cam.update();
+  }
 
-  if( glfwGetKey( window, GLFW_KEY_D ) )
+  if( glfwGetKey( window, GLFW_KEY_D ) ) {
     cam.move_horizontally( delta_time * cameraSpeed );
+    cam.update();
+  }
 }
 
 void mouse_callback( GLFWwindow* window, double xpos, double ypos ) {
@@ -39,6 +46,7 @@ void mouse_callback( GLFWwindow* window, double xpos, double ypos ) {
   float offsety = static_cast<float>(ypos - last_cursor_y) * sensitivity;
 
   cam.rotate( vec3( -offsety, -offsetx, 0.0f ) );
+  cam.update();
 
   last_cursor_x = xpos;
   last_cursor_y = ypos;
