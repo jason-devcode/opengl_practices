@@ -1,2 +1,2 @@
-# OpenGL Practices using GLFW, GLAD and OpenGL Core 3.3
+# OpenGL Practices using GLFW, GLAD, GLM and OpenGL Core 3.3
 
