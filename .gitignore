@@ -1,2 +1,3 @@
 main
 tmp/
+practices/**/build/*.o

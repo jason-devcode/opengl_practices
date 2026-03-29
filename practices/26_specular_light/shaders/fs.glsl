@@ -10,11 +10,13 @@ out vec4 FragColor;
 
 uniform sampler2D tex0;
 
+uniform float specIntensity;
+
+uniform vec3 viewPos;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 ambientLight;
 
-uniform vec3 viewPos;
 
 void main() {
     vec3 lightDir = normalize( lightPos - fragPos );
@@ -25,10 +27,9 @@ void main() {
 
     // Calculate specular light
     vec3 reflect_light = normalize( reflect( -lightDir, vNormal ) );
-    float spec = pow( max( dot( viewDir, reflect_light ), 0 ), 8 );
+    float spec = pow( max( dot( viewDir, reflect_light ), 0 ), specIntensity );
 
     vec3 specular = lightColor * spec ;
 
     FragColor = texture( tex0, TexCoord ) * vec4( ambientLight + diffuse + specular, 1.0 );
-    // FragColor = texture( tex0, TexCoord ) * vec4( lightColor, 1.0 );
 }

@@ -6,7 +6,14 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+
 #include "logger.h"
+
+#include "imgui/imgui.h"
+#include "imgui/imgui_impl_glfw.h"
+#include "imgui/imgui_impl_opengl3.h"
+
+#include "camera_inputs.h"
 
 void framebuffer_size_callback( GLFWwindow*, int width, int height ) {
     glViewport( 0, 0, width, height );
@@ -43,8 +50,9 @@ GLFWwindow* init_engine( int width, int height, const char* title) {
 
     glfwMakeContextCurrent( window );
     glfwSetFramebufferSizeCallback( window, framebuffer_size_callback );
+    glfwSetCursorPosCallback( window, mouse_callback );
 
-    glfwSetInputMode( window, GLFW_CURSOR, GLFW_CURSOR_DISABLED );
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 
     if( not gladLoadGLLoader( (GLADloadproc) glfwGetProcAddress ) ) {
         LOG_ERROR("Failed to load GL Loader!");
@@ -53,10 +61,26 @@ GLFWwindow* init_engine( int width, int height, const char* title) {
         return NULL;
     }
 
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+    // io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);          // Second param install_callback=true will install GLFW callbacks and chain to existing ones.
+    ImGui_ImplOpenGL3_Init();
+
     return window;
 }
 
 void close_engine( GLFWwindow* window ) {
+    ImGui_ImplOpenGL3_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     if( window ) glfwDestroyWindow( window );
     glfwTerminate();
 }
