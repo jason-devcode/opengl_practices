@@ -17,6 +17,7 @@ uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 ambientLight;
 
+uniform bool bDrawTexture;
 
 void main() {
     vec3 lightDir = normalize( lightPos - fragPos );
@@ -29,7 +30,12 @@ void main() {
     vec3 reflect_light = normalize( reflect( -lightDir, vNormal ) );
     float spec = pow( max( dot( viewDir, reflect_light ), 0 ), specIntensity );
 
-    vec3 specular = lightColor * spec ;
+    vec3 specular = lightColor * spec;
 
-    FragColor = texture( tex0, TexCoord ) * vec4( ambientLight + diffuse + specular, 1.0 );
+    if(bDrawTexture){
+        FragColor = texture( tex0, TexCoord ) * vec4( ambientLight + diffuse + specular, 1.0 );
+    }
+    else {
+        FragColor = vec4( vColor * (ambientLight + diffuse + specular), 1.0 ); 
+    }
 }
