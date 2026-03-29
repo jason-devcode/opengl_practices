@@ -19,7 +19,6 @@ BUILD_DIR="build"
 mkdir -p "$BUILD_DIR"
 
 # ==================== COMPILAR IMGUI COMO LIBRERÍA ESTÁTICA ====================
-echo "=== Compilando ImGui como librería estática ==="
 
 # Buscar automáticamente todos los .cpp dentro de libs/imgui/
 # (esto incluye imgui.cpp, imgui_draw.cpp, imgui_widgets.cpp, imgui_tables.cpp,
@@ -30,8 +29,6 @@ if [ ${#IMGUI_CPP_FILES[@]} -eq 0 ]; then
     echo "Error: No se encontraron archivos .cpp en $IMGUI_DIR"
     exit 1
 fi
-
-echo "Se encontraron ${#IMGUI_CPP_FILES[@]} archivos .cpp de ImGui"
 
 # Compilar solo los archivos que hayan cambiado
 for src in "${IMGUI_CPP_FILES[@]}"; do
@@ -52,7 +49,6 @@ done
 ar rcs "$BUILD_DIR/libimgui.a" "$BUILD_DIR"/*.o
 
 # ==================== COMPILAR TU PROGRAMA ====================
-echo "=== Compilando main.cpp ==="
 
 g++ main.cpp "$GLAD_SRC" -o main \
     -I "$IMGUI_DIR" \
@@ -67,6 +63,3 @@ g++ main.cpp "$GLAD_SRC" -o main \
     -lglm \
     -lGL -ldl -lpthread \
     -O3 -std=c++17
-
-echo "¡Compilación terminada!"
-echo "Ejecuta con: ./main"
