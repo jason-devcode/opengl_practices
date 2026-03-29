@@ -14,8 +14,8 @@
 #include <stdint.h>
 #include <string.h>
 
-#define WIDTH 512 * 2
-#define HEIGHT 512 * 2
+#define WIDTH (512 * 3)
+#define HEIGHT (512 * 2)
 #define TITLE "25 - diffuse light"
 
 using vec3 = glm::vec3;
@@ -39,7 +39,7 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   puts("======== TEXTURES ========");
   Texture tx0 = load_texture( "textures/uv_checker.png" );
 
-  glm::mat4 projection = glm::perspective( glm::radians(45.0f), static_cast<float>(1.0f), 0.1f, 2000.0f );
+  glm::mat4 projection = glm::perspective( glm::radians(45.0f), static_cast<float>( WIDTH / HEIGHT ) * 1.5f, 0.1f, 2000.0f );
 
   float delta_time = 0.0f;
   float last_time = glfwGetTime();
@@ -55,6 +55,7 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
   cam.update();
 
   float specIntensity = 32.0;
+  bool shouldDrawTexture = true;
   
   while ( !glfwWindowShouldClose( window ) )
   {
@@ -79,7 +80,9 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
     common_shader->setVec3( "ambientLight", ambient_light );
     common_shader->setVec3( "viewPos"     , cam.position  );
     common_shader->setFloat( "specIntensity", specIntensity );
+    common_shader->setBool(  "bDrawTexture", shouldDrawTexture );
 
+    
     common_shader->setMat4( "model"     , model       );
     common_shader->setMat4( "view"      , view        );
     common_shader->setMat4( "projection", projection  );
@@ -108,8 +111,13 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    ImGui::Begin("Light Config");
+    ImGui::Begin("Render Config");
+    ImGui::SeparatorText("Draw Config");
+    ImGui::Checkbox("Draw texture", &shouldDrawTexture);
+    ImGui::SeparatorText("Specular Config");
     ImGui::SliderFloat("Spec Intesity", &specIntensity, 0.0f, 512.0f, "%.2f");
+    ImGui::SeparatorText("Light Color");
+    ImGui::ColorPicker3("Light Color", glm::value_ptr( light_color ) );
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
