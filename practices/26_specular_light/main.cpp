@@ -56,6 +56,8 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
 
   float specIntensity = 32.0;
   bool shouldDrawTexture = true;
+  bool shouldLightRotate = false;
+  float light_rotation_speed = -180.0f;
   
   while ( !glfwWindowShouldClose( window ) )
   {
@@ -72,7 +74,9 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
 
     common_shader->use();
     
-    // light_model = glm::rotate( mat4(1.0f), glm::radians( -180.0f ) * delta_time , vec3( 0.0f, 1.0f, 0.0f ) ) * light_model;
+    if( shouldLightRotate )
+      light_model = glm::rotate( mat4(1.0f), glm::radians( light_rotation_speed ) * delta_time , vec3( 0.0f, 1.0f, 0.0f ) ) * light_model;
+
     vec3 light_pos = light_model * vec4( 1.0f, 0.0f, 0.0f, 1.0f );
 
     common_shader->setVec3( "lightColor"  , light_color   );
@@ -114,10 +118,13 @@ void render_loop( GLFWwindow* window, int initial_width, int initial_height ) {
     ImGui::Begin("Render Config");
     ImGui::SeparatorText("Draw Config");
     ImGui::Checkbox("Draw texture", &shouldDrawTexture);
-    ImGui::SeparatorText("Specular Config");
+    ImGui::SeparatorText("Light Config");
+    ImGui::Checkbox("Rotation", &shouldLightRotate);
+    ImGui::SliderFloat("Rotation Speed", &light_rotation_speed, -360.0f, 360.0f, "%.2f");
     ImGui::SliderFloat("Spec Intesity", &specIntensity, 0.0f, 512.0f, "%.2f");
-    ImGui::SeparatorText("Light Color");
-    ImGui::ColorPicker3("Light Color", glm::value_ptr( light_color ) );
+
+    ImGui::Separator();
+    ImGui::ColorEdit3("Color", glm::value_ptr( light_color ) );
     ImGui::End();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
