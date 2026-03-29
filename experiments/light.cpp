@@ -227,33 +227,36 @@ void main() {
 
 const char* fs_src = R"(
 #version 330 core
-
-in vec3 vColor;
-in vec3 vNormal;
 in vec3 vPos;
+in vec3 vNormal;
 
 out vec4 FragColor;
 
 uniform vec3 light_color;
 uniform vec3 light_pos;
 uniform vec3 ambient_light;
-
 uniform vec3 eye_pos;
 
 void main() {
-  vec3 light_dir = normalize( light_pos - vPos );
-  float specularStrength = 0.5;
-  
-  float diff = max( 0.0, dot( light_dir, vNormal  ));
+    vec3 norm      = normalize(vNormal);
+    vec3 light_dir = normalize(light_pos - vPos);
+    vec3 view_dir  = normalize(eye_pos - vPos);
 
-  vec3 reflect_dir = reflect( -light_dir, vNormal );
-  vec3 view_dir    = normalize( eye_pos - vPos );
-  float spec       = pow( max( dot( view_dir, reflect_dir ), 0.0 ), 256 );
+    // Diffuse
+    float diff = max(dot(norm, light_dir), 0.0);
+    vec3 diffuse = light_color * diff * 0.7;   // puedes ajustar
 
-  vec3 diffuse = light_color * diff;
-  vec3 specular = light_color * spec;
+    // === BLINN-PHONG SPECULAR (recomendado) ===
+    vec3 halfway_dir = normalize(light_dir + view_dir);
+    float spec = pow(max(dot(norm, halfway_dir), 0.0), 256.0);  // prueba 32, 64, 128...
 
-  FragColor = vec4( vColor * (ambient_light + diffuse) + specular , 1.0);
+    vec3 specular = light_color * spec * 0.8;
+
+    // Ambient
+    vec3 ambient = ambient_light * vec3(0.15, 0.15, 0.4);
+
+    vec3 result = ambient + diffuse + specular;
+    FragColor = vec4(result, 1.0);
 }
 )";
 
@@ -422,7 +425,7 @@ typedef struct {
 
 void render_loop( GLFWwindow* window ) {
   glViewport( 0.0f, 0.0f, SCREEN_W, SCREEN_H );
-  glClearColor( 0.1f, 0.1f, 0.2f, 1.0f );
+  glClearColor( 0.1f, 0.1f, 0.3f, 1.0f );
   glEnable( GL_DEPTH_TEST );
 
   Mesh cube = gen_cube( 32, 32, spherization );
@@ -443,8 +446,8 @@ void render_loop( GLFWwindow* window ) {
   lastTime = glfwGetTime();
 
   Light light = (Light){
-    .pos   = { 4.0f, 0.0f, 0.0f },
-    .color = { 1.0f, 0.0f, 1.0f },
+    .pos   = { 0.0f, 2.0f, -5.0f },
+    .color = { 1.0f, 1.0f, 1.0f },
     .mesh  = &sphere
   };
 
@@ -464,7 +467,7 @@ void render_loop( GLFWwindow* window ) {
 
     view = glm::lookAt( camera_pos, camera_pos + camera_direction, camera_up );
 
-    model = glm::rotate( model, glm::radians( 1.0f ), vec3( 0.0f, 1.0f, 0.0f ) );
+    // model = glm::rotate( model, glm::radians( 1.0f ), vec3( 0.0f, 1.0f, 0.0f ) );
 
     setMat4Uniform(  "model"       , model        );
     setMat4Uniform(  "view"        , view         );
