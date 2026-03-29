@@ -52,6 +52,16 @@ public:
         glUniform1f( u_loc, input );
     }
 
+    void setInt( const char* uniform_name, int input ) {
+        GLuint u_loc = glGetUniformLocation( program, uniform_name );
+        glUniform1i( u_loc, input );
+    }
+
+    void setBool( const char* uniform_name, bool input ) {
+        GLuint u_loc = glGetUniformLocation( program, uniform_name );
+        glUniform1i( u_loc, input );
+    }
+
     void setMat4( const char* uniform_name, mat4& input ) {
         GLuint u_loc = glGetUniformLocation( program, uniform_name );
         glUniformMatrix4fv( u_loc, 1, GL_FALSE, glm::value_ptr( input ) );
