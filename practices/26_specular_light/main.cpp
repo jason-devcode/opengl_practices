@@ -16,7 +16,7 @@
 
 #define WIDTH (512 * 3)
 #define HEIGHT (512 * 2)
-#define TITLE "25 - diffuse light"
+#define TITLE "26 - specular light + ImGui"
 
 using vec3 = glm::vec3;
 using vec2 = glm::vec2;
